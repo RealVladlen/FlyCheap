@@ -7,12 +7,13 @@ public class ImageDragger : MonoBehaviour, IDragHandler, IBeginDragHandler
     [SerializeField] private RectTransform viewportRect;
     [SerializeField] private FlightView flightView;
     [SerializeField] private Canvas canvas;
+    [SerializeField] private float smoothSpeed = 10f; 
 
     private RectTransform _imageRect; 
     private Vector2 _minBounds;
     private Vector2 _maxBounds;
     private Vector2 _lastTouchPosition;
-
+    private Vector2 _targetPosition;
 
     private void Start()
     {
@@ -20,6 +21,12 @@ public class ImageDragger : MonoBehaviour, IDragHandler, IBeginDragHandler
         CalculateBounds();
 
         canvas = GetComponentInParent<Canvas>();
+        _targetPosition = _imageRect.anchoredPosition;
+    }
+
+    private void Update()
+    {
+        _imageRect.anchoredPosition = Vector2.Lerp(_imageRect.anchoredPosition, _targetPosition, Time.deltaTime * smoothSpeed);
     }
 
     private void CalculateBounds()
@@ -49,11 +56,11 @@ public class ImageDragger : MonoBehaviour, IDragHandler, IBeginDragHandler
         Vector2 delta = currentTouchPosition - _lastTouchPosition;
         _lastTouchPosition = currentTouchPosition;
 
-        Vector2 newPosition = _imageRect.anchoredPosition + delta;
+        Vector2 newPosition = _targetPosition + delta;
 
         newPosition.x = Mathf.Clamp(newPosition.x, _minBounds.x, _maxBounds.x);
         newPosition.y = Mathf.Clamp(newPosition.y, _minBounds.y, _maxBounds.y);
 
-        _imageRect.anchoredPosition = newPosition;
+        _targetPosition = newPosition; 
     }
 }
